@@ -1,0 +1,8 @@
+{
+  "u_resolution": 0.008870753925293684,
+  "unit": "分析像素/45 ms（当前帧运动场单帧位移 × fps×0.045）",
+  "source": "/home/yuanxun/autodl-tmp/Shungo/Contrack/99_临时区/发版_当前帧运动场_20261011/中间/01_分辨率下限.json",
+  "video": "/home/yuanxun/autodl-tmp/Shungo/00_数据仓/Contrack/01_原始视频/02_原始视频区/videos/新视频/4_7_2026-02-08-150451-0000_21c0e20a49.avi",
+  "method": "同一真实帧加边带测到的传感器噪声后重复，当前帧运动场（C2）连续 5 帧窗、76 个窗的内区平均速度的中位数，乘 115×0.045 折成每 45 ms。与 20261009 的测法相同，只换了模型和窗。",
+  "previous": {"u_resolution": 0.0032386283855885267, "unit": "分析像素/帧对（隔 Δ 帧）", "model": "LN4_pairlog_temporalK5_r5_human_6k_ema_step1000"}
+}

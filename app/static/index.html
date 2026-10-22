@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cardiomyograph</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    (function () {
+      var KEY = "contrack-theme";
+      var saved = localStorage.getItem(KEY);
+      var theme = saved || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="static/style.css?v=c2en12" />
+  <script src="static/plotly.min.js?v=c2en2"></script>
+  <script>
+    if (!window.Plotly) {
+      document.write('<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"><\/script>');
+    }
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 10h4l2-6 3 12 3-8 4 10 3-6h5" />
+        </svg>
+      </span>
+      <div class="brand-text">
+        <div class="brand-name">Cardiomyograph</div>
+        <div class="brand-sub">Contraction analysis</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-toggle" id="btnTheme" type="button" aria-label="Switch light or dark theme" title="Switch theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+      <span class="status-led" id="statusPill" role="status">
+        <span class="led" id="statusDot" aria-hidden="true"></span>
+        <span id="statusText">Ready</span>
+      </span>
+      <span class="org">Tongji University · Xiang Lab</span>
+    </div>
+  </header>
+
+  <div class="app">
+    <aside class="rail" aria-label="Controls">
+      <section class="rail-block">
+        <header class="rail-head">
+          <div>
+            <div class="rail-title">Recording</div>
+            <div class="rail-sub">Source</div>
+          </div>
+        </header>
+        <div class="preset-list" id="presetList"></div>
+        <button class="btn btn-secondary btn-full" id="btnSelect" type="button">Select video</button>
+        <input id="fileVideo" type="file" accept="video/*,.mp4,.avi,.mov,.mkv" hidden />
+        <div class="video-slot empty" id="videoCard">
+          <div class="vc-empty">Select a video</div>
+        </div>
+      </section>
+
+      <section class="rail-block">
+        <header class="rail-head">
+          <div>
+            <div class="rail-title">Domain</div>
+            <div class="rail-sub">Click the map</div>
+          </div>
+        </header>
+        <div class="field">
+          <label for="selDomain">Domain</label>
+          <div class="select-wrap">
+            <select id="selDomain" disabled><option value="">No result yet</option></select>
+          </div>
+          <div class="hint">Click a colored domain. The list follows the click.</div>
+        </div>
+      </section>
+
+      <section class="rail-block rail-run">
+        <button class="btn btn-primary btn-full" id="btnRun" type="button">
+          <span class="btn-spinner" aria-hidden="true"></span>
+          <span id="runLabel">Run analysis</span>
+        </button>
+        <div class="progress-panel" id="progressCard" hidden>
+          <div class="pbar"><div class="pbar-fill" id="pbarFill"></div></div>
+          <div class="progress-meta">
+            <span id="progStage">—</span>
+            <span class="mono" id="progPct">0%</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="rail-block">
+        <header class="rail-head">
+          <div>
+            <div class="rail-title">Export</div>
+            <div class="rail-sub">Selected domain</div>
+          </div>
+        </header>
+        <button class="btn btn-secondary btn-full" id="btnCsv" type="button" disabled>Domain CSV</button>
+      </section>
+    </aside>
+
+    <main class="stage">
+      <section class="viewport map-viewport">
+        <header class="viewport-head">
+          <div class="viewport-title">
+            <span class="tag">DOMAINS</span>
+            <h2>Partition</h2>
+          </div>
+          <dl class="telemetry" id="hud">
+            <div class="tel"><dt>DOMAINS</dt><dd class="mono" id="hudDomains">—</dd></div>
+            <div class="tel accent"><dt>CONTRACTIONS</dt><dd class="mono" id="hudBeats">—</dd></div>
+            <div class="tel"><dt>SELECTED</dt><dd class="mono" id="hudDomain">—</dd></div>
+            <div class="tel"><dt>FPS</dt><dd class="mono" id="hudFps">—</dd></div>
+          </dl>
+        </header>
+        <div class="map-wrap" id="mapWrap">
+          <canvas id="mapCanvas" class="map-canvas"></canvas>
+          <div class="map-tip" id="mapTip" hidden></div>
+          <div class="plot-empty" id="mapEmpty">
+            <p>The partition appears here after analysis.</p>
+            <span class="hint">Click a domain to open its |U| and S traces and the parameter tables.</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="param-stack">
+        <section class="viewport param-viewport">
+          <header class="viewport-head compact">
+            <div class="viewport-title">
+              <span class="tag">TABLE S2</span>
+              <h2>Domain parameters</h2>
+            </div>
+          </header>
+          <div class="table-scroll">
+            <table class="param-table" id="domainTable"></table>
+          </div>
+        </section>
+
+        <section class="viewport param-viewport">
+          <header class="viewport-head compact">
+            <div class="viewport-title">
+              <span class="tag">TABLE S1</span>
+              <h2>Contraction parameters</h2>
+            </div>
+          </header>
+          <p class="hint table-note">Median across contractions in this domain. Open a row to see each contraction.</p>
+          <div class="table-scroll" id="beatTable"></div>
+        </section>
+      </div>
+
+      <div class="trace-row">
+        <section class="viewport trace-viewport">
+          <header class="viewport-head compact">
+            <div class="viewport-title">
+              <h2 id="uTitle">|U|</h2>
+            </div>
+          </header>
+          <div class="scope-wrap">
+            <div class="plot" id="uPlot"></div>
+            <div class="plot-empty" id="uEmpty"><p>Select a domain to plot |U|.</p></div>
+          </div>
+        </section>
+        <section class="viewport trace-viewport">
+          <header class="viewport-head compact">
+            <div class="viewport-title">
+              <h2 id="sTitle">S</h2>
+            </div>
+          </header>
+          <div class="scope-wrap">
+            <div class="plot" id="sPlot"></div>
+            <div class="plot-empty" id="sEmpty"><p>Select a domain to plot S.</p></div>
+          </div>
+        </section>
+      </div>
+
+      <p class="version-line" id="versionLine"></p>
+    </main>
+  </div>
+
+  <div class="modal-scrim" id="browseModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Choose a server video">
+      <div class="modal-head">
+        <div class="modal-title">Choose a server video</div>
+        <button class="icon-btn" id="btnCloseModal" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="crumbs" id="crumbs"></div>
+      <div class="browser" id="browser"><div class="loading-row">Loading…</div></div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toasts" aria-live="polite"></div>
+  <script src="static/customselect.js?v=c2en"></script>
+  <script src="static/app.js?v=cmg1"></script>
+</body>
+</html>
