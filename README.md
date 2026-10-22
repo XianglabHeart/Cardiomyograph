@@ -8,7 +8,7 @@ This repository accompanies a manuscript that is under review.
 
 The files in this repository are a packaged Linux build. The package contains the analysis program and the trained weight. It does not contain the source code.
 
-The source code will be released in this repository after the manuscript is published. The repository will be made public at the same time. Until publication, the repository remains private, and this packaged build is the form we distribute.
+The source code will be released in this repository after the manuscript is published. The packaged build in this repository is public. The source code is not in this repository yet.
 
 ## What you need
 
