@@ -44,4 +44,4 @@ Results and copied videos are stored in `~/.local/share/Cardiomyograph`. Set `CM
 
 ## License
 
-See `LICENSE`. The source code, once released after publication, will be under the same license.
+This packaged build is free for non-commercial research and academic teaching. Commercial use, modification, and sale are not permitted. See LICENSE.
