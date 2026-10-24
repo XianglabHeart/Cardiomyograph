@@ -10,6 +10,12 @@ The files in this repository are a packaged Linux build. The package contains th
 
 The source code will be released in this repository after the manuscript is published. The packaged build in this repository is public. The source code is not in this repository yet.
 
+Five original example recordings used in the paper are available in the release [sample-data-v1](https://github.com/XianglabHeart/Cardiomyograph/releases/tag/sample-data-v1): a baseline/treated pair for 10 nM ISO (Figure 2), a baseline/treated pair for 50 nM E-4031 (Figure 3), and a recording of hiPSC-CMs carrying a heterozygous PKP2 variant (Figure 5C). SHA-256 checksums are provided in `SHA256SUMS.txt` in the same release.
+
+## Online analysis
+
+An online demonstration is available at [analysis.xianglab.online](https://analysis.xianglab.online/). The current public site provides the example recordings for interactive exploration. Upload and analysis of user-supplied recordings will be enabled in a future release.
+
 ## What you need
 
 - 64-bit Linux
